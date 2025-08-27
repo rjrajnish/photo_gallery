@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/Rjrajnish99/photo-gallery/backend/cmd/api/middleware"
-	"github.com/Rjrajnish99/photo-gallery/backend/internal/handlers"
+	"github.com/Rjrajnish99/photo_gallery/backend/cmd/api/middleware"
+	"github.com/Rjrajnish99/photo_gallery/backend/internal/handlers"
 )
 
 func SetupRouter() *gin.Engine {

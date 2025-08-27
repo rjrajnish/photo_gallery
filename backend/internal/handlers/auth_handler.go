@@ -10,9 +10,9 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/t3rm1n4l/go-mega"
 
-	"github.com/Rjrajnish99/photo-gallery/backend/internal/db"
-	"github.com/Rjrajnish99/photo-gallery/backend/internal/models"
-	"github.com/Rjrajnish99/photo-gallery/backend/internal/services"
+	"github.com/Rjrajnish99/photo_gallery/backend/internal/db"
+	"github.com/Rjrajnish99/photo_gallery/backend/internal/models"
+	"github.com/Rjrajnish99/photo_gallery/backend/internal/services"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
