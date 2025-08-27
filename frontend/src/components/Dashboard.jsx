@@ -3,6 +3,7 @@ import ImageGallery from "./ImageGallery";
 import { useAuth } from "@/pages/authProvider";
 import { jwtDecode } from "jwt-decode";
 import { getFolders, getPhotos } from "@/pages/api/api";
+import axios from "axios";
 export default function Dashboard() {
   const token = useAuth();
   const { logout } = useAuth();
@@ -38,7 +39,37 @@ export default function Dashboard() {
     getAllFolders();
     getAllPhotos();
   }, []);
- 
+  // For upload modal
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [uploadFiles, setUploadFiles] = useState([]);
+  const uploadHandler = async () => {
+    if (!uploadFiles.length) return alert("Please select files");
+
+    try {
+      const formData = new FormData();
+      uploadFiles.forEach((file) => formData.append("files", file));
+      formData.append("folderId", activeMenu.id); // folder ID
+
+      // send to backend
+      const res = await axios.post(
+        process.env.NEXT_PUBLIC_BASE_URL + "/api/photos/upload",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      if (res.status == 200) {
+        setShowUploadModal(false);
+        getAllPhotos();
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Upload failed");
+    }
+  };
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
@@ -76,7 +107,8 @@ export default function Dashboard() {
                   : "text-gray-700 hover:bg-gray-200"
               }`}
             >
-             <img src="/gallery.svg" className="w-6 h-6" alt="Logout" /> <span className="ml-2">{menu.name}</span>  
+              <img src="/gallery.svg" className="w-6 h-6" alt="Logout" />{" "}
+              <span className="ml-2">{menu.name}</span>
             </button>
           ))}
         </nav>
@@ -84,11 +116,59 @@ export default function Dashboard() {
 
       {/* Main Content */}
       <div className="flex-1 p-6 overflow-y-auto">
-        <h2 className="text-2xl font-bold mb-4 ">{activeMenu &&activeMenu.name}</h2>
+        <h2 className="text-2xl font-bold mb-4 ">
+          {activeMenu && activeMenu.name}
+        </h2>
 
         {/* Image Grid */}
         <ImageGallery filteredPhotos={filteredPhotos} />
       </div>
+      {/* Upload Button */}
+      <div className="fixed bottom-4 right-4">
+        <button
+          className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+          onClick={() => setShowUploadModal(true)}
+        >
+          Upload
+        </button>
+      </div>
+
+      {/* Upload Modal */}
+      {showUploadModal && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          onClick={() => setShowUploadModal(false)}
+        >
+          <div
+            className="bg-white rounded-lg p-6 w-100"
+            onClick={(e) => e.stopPropagation()} // prevent closing modal when clicking inside
+          >
+            <h2 className="text-lg font-bold mb-4">Upload Image / Video</h2>
+            <input
+              type="file"
+              multiple
+              accept="image/*,video/*"
+              className="mb-4 p-2 border border-gray-300 rounded-lg"
+              placeholder="Upload Image / Video"
+              onChange={(e) => setUploadFiles(Array.from(e.target.files))}
+            />
+            <div className="flex justify-end space-x-2">
+              <button
+                className="bg-gray-300 px-4 py-2 rounded-lg"
+                onClick={() => setShowUploadModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => uploadHandler()}
+                className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+              >
+                Upload
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

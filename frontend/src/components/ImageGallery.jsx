@@ -1,10 +1,11 @@
+import axios from "axios";
 import { useEffect, useState } from "react";
 
 export default function ImageGallery({ filteredPhotos }) {
   const [images, setImages] = useState(filteredPhotos);
   const [loading, setLoading] = useState(false);
 
-  // For modal
+  // For full-image modal
   const [selectedImage, setSelectedImage] = useState(null);
 
   useEffect(() => {
@@ -36,22 +37,32 @@ export default function ImageGallery({ filteredPhotos }) {
 
   return (
     <div>
+      {/* Image Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {images?.length > 0 &&
           images.map((img) => (
             <div
               key={img.id}
-              className="bg-white rounded-2xl shadow-md overflow-hidden cursor-pointer hover:scale-105 transition duration-300 ease-in-out"
-              onClick={() => setSelectedImage(img.url)}
+              className="relative bg-white rounded-2xl shadow-md overflow-hidden cursor-pointer hover:scale-105 transition duration-300 ease-in-out"
+              onClick={() => setSelectedImage(img)}
             >
-              <img
-                src={img.url}
-                alt={img.filename}
-                className="w-full h-40 object-cover "
-              />
+              {img.filename.includes(".mp4") ? (
+                <video
+                  src={img.url}
+                  className="w-full h-40 object-cover"
+                  controls
+                />
+              ) : (
+                <img
+                  src={img.url}
+                  alt={img.filename}
+                  className="w-full h-40 object-cover"
+                />
+              )}
             </div>
           ))}
       </div>
+
       {images.length === 0 && (
         <h1 className="text-2xl font-bold text-center mt-6">No images found</h1>
       )}
@@ -63,18 +74,26 @@ export default function ImageGallery({ filteredPhotos }) {
         </div>
       )}
 
-      {/* Modal */}
+      {/* Full Image Modal */}
       {selectedImage && (
         <div
           className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
           onClick={() => setSelectedImage(null)}
         >
-          <img
-            src={selectedImage}
-            alt="Full"
-            className="max-h-[100%] max-w-[100%] rounded-lg shadow-lg"
-            onClick={(e) => e.stopPropagation()} // prevent closing modal when clicking image
-          />
+          {selectedImage.filename.includes(".mp4") ? (
+            <video
+              src={selectedImage.url}
+            autoPlay
+              className="max-h-[100%] max-w-[100%] rounded-lg shadow-lg"
+            />
+          ) : (
+            <img
+              src={selectedImage.url}
+              alt="Full"
+              className="max-h-[100%] max-w-[100%] rounded-lg shadow-lg"
+              onClick={(e) => e.stopPropagation()}
+            />
+          )}
           <button
             className="absolute top-4 right-4 text-white text-2xl font-bold"
             onClick={() => setSelectedImage(null)}

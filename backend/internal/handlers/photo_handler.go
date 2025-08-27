@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -138,17 +140,17 @@ func (h *PhotoHandler) Stream(c *gin.Context) {
     ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
     defer cancel()
 
-	pid, err := primitive.ObjectIDFromHex(photoId)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid photo id"})
-		return
-	}
-    // Find photo by its string ID
+    // Convert string ID to ObjectID
+    pid, err := primitive.ObjectIDFromHex(photoId)
+    if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "invalid photo id"})
+        return
+    }
+
+    // Find photo by its ID
     var p models.Photo
-    if err := db.DB.Collection("photos").FindOne(ctx, bson.M{
-        "_id":pid,
-    }).Decode(&p); err != nil {
-        c.JSON(http.StatusNotFound, gin.H{"error": "photo not found"})
+    if err := db.DB.Collection("photos").FindOne(ctx, bson.M{"_id": pid}).Decode(&p); err != nil {
+        c.JSON(http.StatusNotFound, gin.H{"error": "file not found"})
         return
     }
 
@@ -159,11 +161,32 @@ func (h *PhotoHandler) Stream(c *gin.Context) {
         return
     }
 
-    // Stream image directly to client
-    c.Header("Content-Type", "image/jpeg")
+    // Determine Content-Type from file extension
+    contentType := "application/octet-stream" // default
+    if p.Filename != "" {
+        ext := strings.ToLower(filepath.Ext(p.Filename))
+        switch ext {
+        case ".jpg", ".jpeg":
+            contentType = "image/jpeg"
+        case ".png":
+            contentType = "image/png"
+        case ".gif":
+            contentType = "image/gif"
+        case ".mp4":
+            contentType = "video/mp4"
+        case ".mov":
+            contentType = "video/quicktime"
+        case ".webm":
+            contentType = "video/webm"
+        }
+    }
+
+    // Stream file
+    c.Header("Content-Type", contentType)
     c.Status(http.StatusOK)
     _ = services.Mega().Download(node, c.Writer)
 }
+
 
 
 

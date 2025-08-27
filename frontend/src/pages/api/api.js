@@ -17,3 +17,4 @@ export const loginAPI = (email, password) =>
 export const getFolders = () => api.get("/folders");
 // get all photos
 export const getPhotos = () => api.get("/photos");
+
