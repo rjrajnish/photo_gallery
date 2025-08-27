@@ -1,4 +1,5 @@
-module github.com/Rjrajnish99/photo_gallery/backend
+module github.com/rjrajnish/photo_gallery/backend
+
 
 go 1.22
 

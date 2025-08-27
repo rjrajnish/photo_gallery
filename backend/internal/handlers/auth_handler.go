@@ -8,11 +8,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/joho/godotenv"
-	 
 
-	"github.com/Rjrajnish99/photo_gallery/backend/internal/db"
-	"github.com/Rjrajnish99/photo_gallery/backend/internal/models"
-	"github.com/Rjrajnish99/photo_gallery/backend/internal/services"
+	"github.com/rjrajnish/photo_gallery/backend/internal/db"
+	"github.com/rjrajnish/photo_gallery/backend/internal/models"
+	"github.com/rjrajnish/photo_gallery/backend/internal/services"
 	"go.mongodb.org/mongo-driver/bson"
 )
 

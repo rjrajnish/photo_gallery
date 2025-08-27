@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"github.com/Rjrajnish99/photo_gallery/backend/internal/db"
+	"github.com/rjrajnish/photo_gallery/backend/internal/db"
 )
 
 func main() {
