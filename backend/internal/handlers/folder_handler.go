@@ -43,7 +43,17 @@ func (h *FolderHandler) Create(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	_ = db.DB.Collection("users").FindOne(ctx, bson.M{"_id": userId}).Decode(&user)
+	oid, err := primitive.ObjectIDFromHex(userId)
+if err != nil {
+    c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user id"})
+    return
+}
+
+if err := db.DB.Collection("users").FindOne(ctx, bson.M{"_id": oid}).Decode(&user); err != nil {
+    c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+    return
+}
+
 
 	rootNode, _ := services.Mega().FindNodeByHandle(user.RootNode)
 	dir, err := services.Mega().CreateFolder(rootNode, body.Name)

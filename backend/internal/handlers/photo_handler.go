@@ -3,6 +3,7 @@ package handlers
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"net/http"
 	"time"
@@ -37,8 +38,10 @@ func (h *PhotoHandler) List(c *gin.Context) {
 }
 
 func (h *PhotoHandler) Upload(c *gin.Context) {
+
 	userId := c.GetString("userId")
 	folderId := c.PostForm("folderId")
+
 	if folderId == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "folderId required"})
 		return
@@ -46,9 +49,15 @@ func (h *PhotoHandler) Upload(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 
+	fid, err := primitive.ObjectIDFromHex(folderId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid folder id"})
+		return
+	}
 	// find folder mega node
 	var folder models.Folder
-	if err := db.DB.Collection("folders").FindOne(ctx, bson.M{"_id": folderId, "userId": userId}).Decode(&folder); err != nil {
+	fmt.Println("	folderId", fid, userId)
+	if err := db.DB.Collection("folders").FindOne(ctx, bson.M{"_id": fid, "userId": userId}).Decode(&folder); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "folder not found"})
 		return
 	}
@@ -109,26 +118,36 @@ func (h *PhotoHandler) Delete(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"deleted": len(body.PhotoIDs)})
 }
-
 func (h *PhotoHandler) Stream(c *gin.Context) {
-	userId := c.GetString("userId")
-	photoId := c.Param("id")
+    userId := c.GetString("userId")
+    photoId := c.Param("id")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+    ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+    defer cancel()
 
-	var p models.Photo
-	if err := db.DB.Collection("photos").FindOne(ctx, bson.M{"_id": photoId, "userId": userId}).Decode(&p); err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "photo not found"})
-		return
-	}
-	node, err := services.Mega().FindNodeByHandle(p.MegaNode)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "mega node not found"})
-		return
-	}
+    pid, err := primitive.ObjectIDFromHex(photoId)
+    if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "invalid photo id"})
+        return
+    }
 
-	c.Header("Content-Type", "image/*")
-	c.Status(http.StatusOK)
-	_ = services.Mega().Download(node, c.Writer)
+    var p models.Photo
+    if err := db.DB.Collection("photos").FindOne(ctx, bson.M{
+        "_id":    pid,
+        "userId": userId,
+    }).Decode(&p); err != nil {
+        c.JSON(http.StatusNotFound, gin.H{"error": "photo not found"})
+        return
+    }
+
+    node, err := services.Mega().FindNodeByHandle(p.MegaNode)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "mega node not found"})
+        return
+    }
+
+    c.Header("Content-Type", "image/jpeg")
+    c.Status(http.StatusOK)
+    _ = services.Mega().Download(node, c.Writer)
 }
+

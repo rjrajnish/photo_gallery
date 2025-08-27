@@ -1,6 +1,7 @@
 package main
 
 import (
+	 
 	"log"
 	"os"
 
@@ -9,7 +10,8 @@ import (
 )
 
 func main() {
-	_ = godotenv.Load()
+	_ = godotenv.Load(".env")
+	 
 	db.InitMongo()
 
 	port := os.Getenv("PORT")
@@ -18,6 +20,7 @@ func main() {
 	}
 
 	r := SetupRouter()
+
 	log.Println("API on :" + port)
 	_ = r.Run(":" + port)
 }

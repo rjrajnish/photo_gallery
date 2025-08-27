@@ -27,6 +27,12 @@ func InitMongo() {
 		log.Fatal("mongo connect:", err)
 	}
 
+	// ✅ Verify connection with Ping
+	if err := client.Ping(ctx, nil); err != nil {
+		log.Fatal("mongo ping:", err)
+	}
+
 	Client = client
 	DB = client.Database(dbName)
+	log.Println("✅ Connected to MongoDB:", dbName)
 }
