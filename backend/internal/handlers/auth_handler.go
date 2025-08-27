@@ -20,6 +20,7 @@ type AuthHandler struct{}
 func NewAuthHandler() *AuthHandler { return &AuthHandler{} }
 
 type registerReq struct {
+	Name     string `json:"name" binding:"required"`
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required,min=6"`
 }
@@ -53,6 +54,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 
 	hash, _ := services.HashPassword(body.Password)
 	user := models.User{
+		Name:      body.Name,
 		Email:     body.Email,
 		Password:  hash,
 		RootNode:  dir.GetHash(), // MEGA handle
@@ -90,6 +92,6 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
 		return
 	}
-	token, _ := services.CreateJWT(user.ID)
-	c.JSON(http.StatusOK, gin.H{"token": token, "email": user.Email})
+	token, _ := services.CreateJWT(user.ID, user.Name, user.Email)
+	c.JSON(http.StatusOK, gin.H{"token": token, "isLogin": true})
 }

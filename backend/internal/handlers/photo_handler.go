@@ -31,11 +31,25 @@ func (h *PhotoHandler) List(c *gin.Context) {
 	if folderId != "" {
 		filter["folderId"] = folderId
 	}
-	cur, _ := db.DB.Collection("photos").Find(ctx, filter)
-	var out []models.Photo
-	_ = cur.All(ctx, &out)
-	c.JSON(http.StatusOK, out)
+
+	cur, err := db.DB.Collection("photos").Find(ctx, filter)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	var photos []models.Photo
+	_ = cur.All(ctx, &photos)
+
+	// Generate backend stream URL for each photo
+	for i := range photos {
+		photos[i].URL = "http://127.0.0.1:8080/api/photos/" + photos[i].ID + "/stream"
+	}
+
+	c.JSON(http.StatusOK, photos)
 }
+
+
 
 func (h *PhotoHandler) Upload(c *gin.Context) {
 
@@ -119,35 +133,37 @@ func (h *PhotoHandler) Delete(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"deleted": len(body.PhotoIDs)})
 }
 func (h *PhotoHandler) Stream(c *gin.Context) {
-    userId := c.GetString("userId")
     photoId := c.Param("id")
 
     ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
     defer cancel()
 
-    pid, err := primitive.ObjectIDFromHex(photoId)
-    if err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": "invalid photo id"})
-        return
-    }
-
+	pid, err := primitive.ObjectIDFromHex(photoId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid photo id"})
+		return
+	}
+    // Find photo by its string ID
     var p models.Photo
     if err := db.DB.Collection("photos").FindOne(ctx, bson.M{
-        "_id":    pid,
-        "userId": userId,
+        "_id":pid,
     }).Decode(&p); err != nil {
         c.JSON(http.StatusNotFound, gin.H{"error": "photo not found"})
         return
     }
 
+    // Get the Mega node
     node, err := services.Mega().FindNodeByHandle(p.MegaNode)
     if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "mega node not found"})
         return
     }
 
+    // Stream image directly to client
     c.Header("Content-Type", "image/jpeg")
     c.Status(http.StatusOK)
     _ = services.Mega().Download(node, c.Writer)
 }
+
+
 
