@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/joho/godotenv"
-	"github.com/t3rm1n4l/go-mega"
+	 
 
 	"github.com/Rjrajnish99/photo_gallery/backend/internal/db"
 	"github.com/Rjrajnish99/photo_gallery/backend/internal/models"
