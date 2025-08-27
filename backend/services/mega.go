@@ -7,7 +7,8 @@ import (
 	"os"
 	"sync"
 
-	mega "github.com/t3rm1n4l/go-mega"
+  "github.com/t3rm1n4l/go-mega"
+
 )
 
 type MegaService struct {
