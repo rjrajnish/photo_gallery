@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import ImageGallery from "./ImageGallery";
-import { useAuth } from "@/pages/authProvider";
+import { useAuth } from "@/components/authProvider";
 import { jwtDecode } from "jwt-decode";
 import { createFolder, getFolders, getPhotos } from "@/pages/api/api";
 import axios from "axios";

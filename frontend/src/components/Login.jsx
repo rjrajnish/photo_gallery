@@ -1,4 +1,4 @@
-import { useAuth } from "@/pages/authProvider";
+import { useAuth } from "@/components/authProvider";
 import { useState } from "react";
 
 export default function Login() {

@@ -1,6 +1,6 @@
 import Login from "@/components/Login";
 import Dashboard from "@/components/Dashboard";
-import { AuthProvider, useAuth } from "./authProvider";
+import { AuthProvider, useAuth } from "../components/authProvider";
 
 function Main() {
   const { token } = useAuth();
