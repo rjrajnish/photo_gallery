@@ -73,6 +73,15 @@ export default function Login() {
           >
             Login
           </button>
+          <p>
+            Don't have an account?{" "}
+            <a
+              href="/register"
+              className="text-blue-500 hover:underline text-blue-700"
+            >
+              Register
+            </a>{" "}
+          </p>
         </form>
       </div>
     </div>

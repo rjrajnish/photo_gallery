@@ -39,7 +39,7 @@ export default function ImageGallery({ filteredPhotos }) {
     <div>
       {/* Image Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {images?.length > 0 &&
+        {images?.length > 0 ? (
           images.map((img) => (
             <div
               key={img.id}
@@ -60,10 +60,15 @@ export default function ImageGallery({ filteredPhotos }) {
                 />
               )}
             </div>
-          ))}
+          ))
+        ) : (
+          <h1 className="text-2xl font-bold text-center mt-6">
+            No images found
+          </h1>
+        )}
       </div>
 
-      {images.length === 0 && (
+      {images?.length === 0 && (
         <h1 className="text-2xl font-bold text-center mt-6">No images found</h1>
       )}
 
@@ -83,7 +88,7 @@ export default function ImageGallery({ filteredPhotos }) {
           {selectedImage.filename.includes(".mp4") ? (
             <video
               src={selectedImage.url}
-            autoPlay
+              autoPlay
               className="max-h-[100%] max-w-[100%] rounded-lg shadow-lg"
             />
           ) : (
