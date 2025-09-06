@@ -35,7 +35,7 @@ func (m *MegaService) mustLogin() {
 	}
 
 	email :="rajnishpandey010@gmail.com" //os.Getenv("MEGA_EMAIL")
-	pass :="Rajnish@123"// os.Getenv("MEGA_PASSWORD")
+	pass :="Rajnish@1215"// os.Getenv("MEGA_PASSWORD")
 	if email == "" || pass == "" {
 		panic("MEGA_EMAIL and MEGA_PASSWORD must be set")
 	}
