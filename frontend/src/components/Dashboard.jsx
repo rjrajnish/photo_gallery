@@ -98,61 +98,89 @@ export default function Dashboard() {
       alert("Folder creation failed");
     }
   };
+  const [open, setOpen] = useState(false);
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
-      <div className="w-64 bg-white shadow-lg flex flex-col">
-        {/* Profile Section */}
-        <div className="flex items-center space-x-3 p-4 border-b">
-          
-          <div>
-            <h3 className="text-lg font-semibold">{user && user.username}</h3>
-            <p className="text-sm text-gray-500">{user && user.email}</p>
-          </div>
+     <>
+  {/* Mobile Hamburger */}
+  <button
+    onClick={() => setOpen(!open)}  // ✅ toggle instead of only true
+    className={`md:hidden w-10 h-10 fixed top-4 ${open ? "right-4" : "left-4"} z-50 bg-gray-800 text-white p-2 rounded-lg`}
+  >
+    {open ? "✕" : "☰"} {/* ✅ show X when open */}
+  </button>
 
-          {/* Icon only button */}
-          <button
-            onClick={() => logout()}
-            className="ml-auto cursor-pointer w-8 h-8   flex items-center justify-center  rounded-full hover:bg-gray-200 transition"
-          >
-            <img src="/logout.svg" alt="Logout" />
-          </button>
-        </div>
-
-        {/* Menu Section */}
-        <nav className="flex-1 p-4 space-y-2">
-          {folders?.length > 0 ? (
-            folders?.map((menu, idx) => (
-              <button
-                key={menu.id}
-                onClick={() => setActiveMenu(menu)}
-                className={` flex w-full text-left px-1 py-2 rounded-lg transition ${
-                  activeMenu.id == menu.id
-                    ? "bg-gray-500 text-white"
-                    : "text-gray-700 hover:bg-gray-200"
-                }`}
-              >
-                <img src="/gallery.svg" className="w-6 h-6" alt="Logout" />{" "}
-                <span className="ml-2">{menu.name}</span>
-              </button>
-            ))
-          ) : (
-            <div className="flex-1 p-4 space-y-2">
-              <h2>No Folders</h2>
-            </div>
-          )}
-          <div className="fixed bottom-4  ">
-            <button className="bg-blue-500 text-white px-4 py-2 rounded-lg"
-              onClick={() => setShowNewFolderModal(true)}>
-              Create Folder
-            </button>
-          </div>
-        </nav>
+  {/* Sidebar (desktop + mobile) */}
+  <div
+    className={`
+      fixed top-0 left-0 h-full w-60 bg-white shadow-lg flex flex-col transform transition-transform duration-300
+      ${open ? "translate-x-0 z-[999]" : "-translate-x-full"}
+      md:translate-x-0 md:static md:block
+    `}
+  >
+    {/* Profile Section */}
+    <div className="flex items-center space-x-3 p-4 border-b">
+      <div>
+        <h3 className="text-lg font-semibold">{user?.username}</h3>
+        <p className="text-sm text-gray-500">{user?.email}</p>
       </div>
 
+      {/* Logout icon */}
+      <button
+        onClick={logout}
+        className="ml-auto cursor-pointer w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 transition"
+      >
+        <img src="/logout.svg" alt="Logout" />
+      </button>
+    </div>
+
+    {/* Menu Section */}
+    <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+      {folders?.length > 0 ? (
+        folders.map((menu) => (
+          <button
+            key={menu.id}
+            onClick={() => setActiveMenu(menu)}
+            className={`flex w-full text-left px-1 py-2 rounded-lg transition ${
+              activeMenu?.id === menu.id
+                ? "bg-gray-500 text-white"
+                : "text-gray-700 hover:bg-gray-200"
+            }`}
+          >
+            <img src="/gallery.svg" className="w-6 h-6" alt="Gallery" />
+            <span className="ml-2">{menu.name}</span>
+          </button>
+        ))
+      ) : (
+        <h2 className="text-gray-500 ">No Folders</h2>
+      )}
+    </nav>
+
+    {/* Create Folder Button */}
+    <div className="p-4 fixed bottom-0 w-full border-t">
+      <button
+        className="bg-blue-500 text-white px-4 py-2 w-full rounded-lg"
+        onClick={() => setShowNewFolderModal(true)}
+      >
+        Create Folder
+      </button>
+    </div>
+  </div>
+
+  {/* Dark overlay (only on mobile) */}
+  {open && (
+    <div
+      className="fixed inset-0  bg-opacity-50 z-40 md:hidden"
+      onClick={() => setOpen(false)}
+    />
+  )}
+</>
+
+
       {/* Main Content */}
-      <div className="flex-1 p-6 overflow-y-auto">
-        <h2 className="text-2xl font-bold mb-4 ">
+      <div className="flex-1 p-6 overflow-y-auto ">
+        <h2 className="text-2xl font-bold mb-4 text-center md:text-left ">
           {activeMenu && activeMenu.name}
         </h2>
 
