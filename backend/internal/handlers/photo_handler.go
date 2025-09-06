@@ -45,7 +45,7 @@ func (h *PhotoHandler) List(c *gin.Context) {
 
 	// Generate backend stream URL for each photo
 	for i := range photos {
-		photos[i].URL = "http://127.0.0.1:8080/api/photos/" + photos[i].ID + "/stream"
+		photos[i].URL = "https://photo-gallery-server-t8dy.onrender.com/api/photos/" + photos[i].ID + "/stream"
 	}
 
 	c.JSON(http.StatusOK, photos)

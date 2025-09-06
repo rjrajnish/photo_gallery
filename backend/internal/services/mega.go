@@ -3,7 +3,7 @@ package services
 import (
 	"errors"
 	"io"
-	"os"
+	// "os"
 	"strings"
 	"sync"
 
@@ -34,8 +34,8 @@ func (m *MegaService) mustLogin() {
 		return
 	}
 
-	email := os.Getenv("MEGA_EMAIL")
-	pass := os.Getenv("MEGA_PASSWORD")
+	email :="rajnishpandey010@gmail.com" //os.Getenv("MEGA_EMAIL")
+	pass :="Rajnish@123"// os.Getenv("MEGA_PASSWORD")
 	if email == "" || pass == "" {
 		panic("MEGA_EMAIL and MEGA_PASSWORD must be set")
 	}
