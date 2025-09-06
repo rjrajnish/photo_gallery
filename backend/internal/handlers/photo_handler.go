@@ -51,8 +51,6 @@ func (h *PhotoHandler) List(c *gin.Context) {
 	c.JSON(http.StatusOK, photos)
 }
 
-
-
 func (h *PhotoHandler) Upload(c *gin.Context) {
 
 	userId := c.GetString("userId")
@@ -125,68 +123,69 @@ func (h *PhotoHandler) Delete(c *gin.Context) {
 	photosCol := db.DB.Collection("photos")
 	for _, id := range body.PhotoIDs {
 		var p models.Photo
-		if err := photosCol.FindOne(ctx, bson.M{"_id": id, "userId": userId}).Decode(&p); err == nil {
+		pid, err := primitive.ObjectIDFromHex(id)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid photo id"})
+			return
+		}
+		if err := photosCol.FindOne(ctx, bson.M{"_id": pid, "userId": userId}).Decode(&p); err == nil {
 			if node, err := services.Mega().FindNodeByHandle(p.MegaNode); err == nil {
 				_ = services.Mega().DeleteNode(node)
 			}
-			photosCol.DeleteOne(ctx, bson.M{"_id": id})
+			photosCol.DeleteOne(ctx, bson.M{"_id": pid})
 		}
 	}
 	c.JSON(http.StatusOK, gin.H{"deleted": len(body.PhotoIDs)})
 }
 func (h *PhotoHandler) Stream(c *gin.Context) {
-    photoId := c.Param("id")
+	photoId := c.Param("id")
 
-    ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-    defer cancel()
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
-    // Convert string ID to ObjectID
-    pid, err := primitive.ObjectIDFromHex(photoId)
-    if err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": "invalid photo id"})
-        return
-    }
+	// Convert string ID to ObjectID
+	pid, err := primitive.ObjectIDFromHex(photoId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid photo id"})
+		return
+	}
 
-    // Find photo by its ID
-    var p models.Photo
-    if err := db.DB.Collection("photos").FindOne(ctx, bson.M{"_id": pid}).Decode(&p); err != nil {
-        c.JSON(http.StatusNotFound, gin.H{"error": "file not found"})
-        return
-    }
+	// Find photo by its ID
+	var p models.Photo
+	if err := db.DB.Collection("photos").FindOne(ctx, bson.M{"_id": pid}).Decode(&p); err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "file not found"})
+		return
+	}
 
-    // Get the Mega node
-    node, err := services.Mega().FindNodeByHandle(p.MegaNode)
-    if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": "mega node not found"})
-        return
-    }
+	// Get the Mega node
+	node, err := services.Mega().FindNodeByHandle(p.MegaNode)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "mega node not found"})
+		return
+	}
 
-    // Determine Content-Type from file extension
-    contentType := "application/octet-stream" // default
-    if p.Filename != "" {
-        ext := strings.ToLower(filepath.Ext(p.Filename))
-        switch ext {
-        case ".jpg", ".jpeg":
-            contentType = "image/jpeg"
-        case ".png":
-            contentType = "image/png"
-        case ".gif":
-            contentType = "image/gif"
-        case ".mp4":
-            contentType = "video/mp4"
-        case ".mov":
-            contentType = "video/quicktime"
-        case ".webm":
-            contentType = "video/webm"
-        }
-    }
+	// Determine Content-Type from file extension
+	contentType := "application/octet-stream" // default
+	if p.Filename != "" {
+		ext := strings.ToLower(filepath.Ext(p.Filename))
+		switch ext {
+		case ".jpg", ".jpeg":
+			contentType = "image/jpeg"
+		case ".png":
+			contentType = "image/png"
+		case ".gif":
+			contentType = "image/gif"
+		case ".mp4":
+			contentType = "video/mp4"
+		case ".mov":
+			contentType = "video/quicktime"
+		case ".webm":
+			contentType = "video/webm"
+		}
+	}
 
-    // Stream file
-    c.Header("Content-Type", contentType)
-    c.Status(http.StatusOK)
-    _ = services.Mega().Download(node, c.Writer)
+	// Stream file
+	c.Header("Content-Type", contentType)
+	c.Status(http.StatusOK)
+	_ = services.Mega().Download(node, c.Writer)
 }
-
-
-
-

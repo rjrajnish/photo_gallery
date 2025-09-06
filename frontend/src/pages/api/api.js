@@ -43,7 +43,7 @@ api.interceptors.response.use(
 export const loginAPI = async (email, password) => {
   try {
     const res = await api.post("/auth/login", { email, password });
-    return res
+    return res;
   } catch (err) {
     throw err; // re-throw so component can catch
   }
@@ -52,15 +52,15 @@ export const loginAPI = async (email, password) => {
 export const createUser = async (name, email, password) => {
   try {
     const res = await api.post("/auth/register", { name, email, password });
-    return res
+    return res;
   } catch (error) {
     throw error;
   }
-}
+};
 export const getFolders = async () => {
   try {
     const res = await api.get("/folders");
-    return res
+    return res;
   } catch (error) {
     throw error;
   }
@@ -71,7 +71,7 @@ export const getFolders = async () => {
 export const getPhotos = async () => {
   try {
     const res = await api.get("/photos");
-    return res
+    return res;
   } catch (error) {
     throw error;
   }
@@ -82,7 +82,18 @@ export const getPhotos = async () => {
 export const createFolder = async (name) => {
   try {
     const res = await api.post("/folders", { name });
-    return res
+    return res;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// delete image
+
+export const deleteImage = async (photoIds) => {
+  try {
+    const res = await api.post(`/photos/delete`, {photoIds});
+    return res;
   } catch (error) {
     throw error;
   }
